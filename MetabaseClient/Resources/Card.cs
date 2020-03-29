@@ -20,7 +20,7 @@ namespace MetabaseClient.Resources
         {
             Endpoint = "api/card";
         }
-        public string BuildRequestDict(int databaseId, string name, string queryString)
+        public string BuildCustomQueryRequestDict(int databaseId, string name, string queryString)
         {
             requestData = new Dictionary<string, object>();
             requestData.Add("name", name);
@@ -46,25 +46,69 @@ namespace MetabaseClient.Resources
             return json;
         }
 
-        public string Get(int? cardId = null)
+        public string BuildCardParameterDict(Dictionary<string, object> prm)
         {
-            string route = Endpoint + cardId;
-            Execute(clientActions.GET, route).GetAwaiter().GetResult();
+            requestData = new Dictionary<string, object>();
+            requestData.Add("ignore_cache", true);
+            List<object> paramList = new List<object>();
+            foreach (KeyValuePair<string, object> kvp in prm)
+            {
+                paramList.Add(new { 
+                    type = "category",
+                    target = new object[]
+                    {
+                        "variable", new string[] {"template-tag", kvp.Key}
+                    },
+                    value = kvp.Value
+                });
+            }
+            object[] param = paramList.ToArray();
+            requestData.Add("parameters", param);
+            string json = JsonConvert.SerializeObject(requestData, Formatting.Indented);
+            return json;
+        }
+
+        //public string Get(int? cardId = null)
+        //{
+        //    string route = Endpoint + cardId;
+        //    Execute(clientActions.GET, route).GetAwaiter().GetResult();
+        //    return resultContent;
+        //}
+
+        public async Task<string> Get(int? cardId = null)
+        {
+            string route = String.Format("{0}/{1}", Endpoint, cardId);
+            await Execute(clientActions.GET, route);
             return resultContent;
         }
 
-        /* Might not be able to test this under current account. */
-        public string Post(int databaseId, string name, string query, string collection = null, string description = null, string collectionId = null)
+        /*
+         string collection = null, string description = null, string collectionId = null
+         */
+         // POST for a custom query
+        public async Task<string> Post(int databaseId, string name, string query)
         {
-            string requestJson = BuildRequestDict(databaseId, name, query);
-            Execute(clientActions.POST, Endpoint, requestJson).GetAwaiter().GetResult();
+            string requestJson = BuildCustomQueryRequestDict(databaseId, name, query);
+            await Execute(clientActions.POST, Endpoint, requestJson);
             return resultContent;
         }
 
-        public string Query(int cardId)
+
+        /*
+            Need to add an argument for a parameter dictionary that will be added to the Request Payload.
+            Probably needs to be a second method like BuildRequestDict().
+            At some level there needs to be knowledge of the query: Either a custom query will be run or
+            the names of the parameters must be known.
+            ...
+            Actually, the Dictionary will have to be built on the UI side anyway. This method should just
+            take an optional Dictionary.
+         */
+        // POST for the query in a card
+        public async Task<string> Query(int cardId, Dictionary<string, object> parameters)
         {
+            string requestJson = BuildCardParameterDict(parameters);
             string route = String.Format("{0}/{1}/query", Endpoint, cardId);
-            Execute(clientActions.POST, route).GetAwaiter().GetResult();
+            await Execute(clientActions.POST, route, requestJson);
             return resultContent;
         }
 

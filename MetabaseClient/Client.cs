@@ -86,11 +86,10 @@ namespace MetabaseClient
                 new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        public bool Login()
+        public async Task Login()
         {
-            Authenticate().GetAwaiter().GetResult();
+            await Authenticate();
             SetRequestHeader();
-            return _authenticated;
         }
 
         /* Improve failed authentication handling */
