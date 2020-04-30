@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.Http;
 using Newtonsoft.Json;
+using MetabaseClient.Exceptions;
 
 namespace MetabaseClient.Resources
 {
@@ -61,7 +62,8 @@ namespace MetabaseClient.Resources
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error Message from Client: {0}", e.Message);
+                throw new RequestException(e.Message);
+                //Console.WriteLine("Error Message from Client: {0}", e.Message);
             }
         }
     }

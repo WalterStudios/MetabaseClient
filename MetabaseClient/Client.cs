@@ -88,8 +88,22 @@ namespace MetabaseClient
 
         public async Task Login()
         {
-            await Authenticate();
-            SetRequestHeader();
+            //await Authenticate();
+            //if (IsAuthenticated)
+            //{
+            //    SetRequestHeader();
+            //} else
+            //{
+            //    throw new AuthenticationException("Username or Password is incorrect.");
+            //}
+            try
+            {
+                await Authenticate();
+                SetRequestHeader();
+            } catch (Exception e)
+            {
+                throw new AuthenticationException("Username or Password is incorrect.");
+            }
         }
 
         /* Improve failed authentication handling */
@@ -97,32 +111,56 @@ namespace MetabaseClient
         {
 
             string authContent = $"{{\"username\": \"{_username}\",\"password\": \"{_password}\"}}";
-            try
+            /*
+             * Try-Catch block only catches any errors and console output will not be displayed in GUIs.
+             * Authentication exception moved to Login method as well.
+             */
+            //try
+            //{
+            //    HttpResponseMessage response = await httpClient.PostAsync("api/session",
+            //        new StringContent(authContent, Encoding.UTF8, "application/json"));
+            //    string resultContent = await response.Content.ReadAsStringAsync();
+
+
+            //    // Consider making a class for the AuthResponse
+            //    // Possibly use <string>.Contains() to see if keys are in json string.
+            //    // JObject.Parse(resultContent).ContainsKey()
+            //    if (JObject.Parse(resultContent).ContainsKey("errors"))
+            //    {
+            //        _authenticated = false;
+            //        //_errorMessage = JObject.Parse(resultContent)["errors"].ToString();
+            //        //throw new AuthenticationException("Username or Password is incorrect.");
+            //    }
+            //    if (JObject.Parse(resultContent).ContainsKey("id"))
+            //    {
+            //        clientToken = JObject.Parse(resultContent)["id"].ToString();
+            //        _authenticated = true;
+            //    }
+
+            //}
+            //catch (Exception e)
+            //{
+            //    throw new AuthenticationException("Username or Password is incorrect.");
+            //    //Console.WriteLine("Error Message from Client: {0}", e.Message);
+            //}
+            HttpResponseMessage response = await httpClient.PostAsync("api/session",
+                new StringContent(authContent, Encoding.UTF8, "application/json"));
+            string resultContent = await response.Content.ReadAsStringAsync();
+
+
+            // Consider making a class for the AuthResponse
+            // Possibly use <string>.Contains() to see if keys are in json string.
+            // JObject.Parse(resultContent).ContainsKey()
+            if (JObject.Parse(resultContent).ContainsKey("errors"))
             {
-                HttpResponseMessage response = await httpClient.PostAsync("api/session",
-                    new StringContent(authContent, Encoding.UTF8, "application/json"));
-                string resultContent = await response.Content.ReadAsStringAsync();
-
-
-                // Consider making a class for the AuthResponse
-                // Possibly use <string>.Contains() to see if keys are in json string.
-                // JObject.Parse(resultContent).ContainsKey()
-                if (JObject.Parse(resultContent).ContainsKey("errors"))
-                {
-                    _authenticated = false;
-                    //_errorMessage = JObject.Parse(resultContent)["errors"].ToString();
-                    throw new AuthenticationException("Username or Password is incorrect.");
-                }
-                if (JObject.Parse(resultContent).ContainsKey("id"))
-                {
-                    clientToken = JObject.Parse(resultContent)["id"].ToString();
-                    _authenticated = true;
-                }
-
+                _authenticated = false;
+                //_errorMessage = JObject.Parse(resultContent)["errors"].ToString();
+                //throw new AuthenticationException("Username or Password is incorrect.");
             }
-            catch (Exception e)
+            if (JObject.Parse(resultContent).ContainsKey("id"))
             {
-                Console.WriteLine("Error Message from Client: {0}", e.Message);
+                clientToken = JObject.Parse(resultContent)["id"].ToString();
+                _authenticated = true;
             }
         }
 
