@@ -35,10 +35,10 @@ namespace MetabaseClient.Resources
             return json;
         }
 
-        public string Post(int databaseId, string query)
+        public async Task<string> Post(int databaseId, string query)
         {
             string requestJson = BuildRequestDict(databaseId, query);
-            Execute(clientActions.POST, Endpoint, requestJson).GetAwaiter().GetResult();
+            await Execute(clientActions.POST, Endpoint, requestJson);
             return resultContent;
         }
 

@@ -68,13 +68,6 @@ namespace MetabaseClient.Resources
             return json;
         }
 
-        //public string Get(int? cardId = null)
-        //{
-        //    string route = Endpoint + cardId;
-        //    Execute(clientActions.GET, route).GetAwaiter().GetResult();
-        //    return resultContent;
-        //}
-
         public async Task<string> Get(int? cardId = null)
         {
             string route = String.Format("{0}/{1}", Endpoint, cardId);
@@ -112,7 +105,7 @@ namespace MetabaseClient.Resources
             return resultContent;
         }
 
-        public string Download(int cardId, string format)
+        public async Task<string> Download(int cardId, string format)
         {
             /* Can only download to csv and json for now. */
             if (!new string[] { "csv", "json" }.Contains(format))
@@ -120,15 +113,15 @@ namespace MetabaseClient.Resources
                 throw new ArgumentException(String.Format("Format '{0}' not supported. Must be 'csv' or 'json'", format));
             }
             string route = String.Format("{0}/{1}/query/{2}", Endpoint, cardId, format);
-            Execute(clientActions.POST, route).GetAwaiter().GetResult();
+            await Execute(clientActions.POST, route);
             // Result Content needs to be dumped to a file with the corresponding extension.
             return resultContent;
         }
 
-        public string Delete(int cardId)
+        public async Task<string> Delete(int cardId)
         {
             string route = String.Format("{0}/{1}", Endpoint, cardId);
-            Execute(clientActions.DELETE, route).GetAwaiter().GetResult();
+            await Execute(clientActions.DELETE, route);
             return resultContent;
         }
 

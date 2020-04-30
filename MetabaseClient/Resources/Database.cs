@@ -22,16 +22,16 @@ namespace MetabaseClient.Resources
             Endpoint = "api/database";
         }
 
-        public string Get(int? databaseId = null)
+        public async Task<string> Get(int? databaseId = null)
         {
             string route = String.Format("{0}/{1}", Endpoint, databaseId);
-            Execute(clientActions.GET, route).GetAwaiter().GetResult();
+            await Execute(clientActions.GET, route);
             return resultContent;
         }
 
-        public string GetByName(string dbName)
+        public async Task<string> GetByName(string dbName)
         {
-            var getAllResult = Get();
+            var getAllResult = await Get();
             JArray jsonResult = JArray.Parse(getAllResult) as JArray;
             dynamic dbs = jsonResult;
             foreach (dynamic db in dbs)
